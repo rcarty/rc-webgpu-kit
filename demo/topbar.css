@@ -1,0 +1,46 @@
+/* top bar, same on every page */
+header.top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(13, 14, 17, 0.72);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+header.top .inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px 16px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 16px 32px;
+}
+header.top .name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text);
+}
+header.top nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  font-size: 15px;
+}
+header.top nav a {
+  color: var(--muted);
+}
+header.top nav a:hover,
+header.top nav a[aria-current] {
+  color: var(--text);
+}
+@media (max-width: 640px) {
+  header.top .inner {
+    padding: 16px 20px;
+  }
+  header.top nav {
+    gap: 18px;
+  }
+}
