@@ -11,13 +11,20 @@ const ZERO = { r: 0, g: 0, b: 0, a: 0 };
 export class FluidRenderer {
   static async create(device, { format, particles, particleStruct }) {
     const file = name => new URL(`./${name}.wgsl`, import.meta.url);
-    const [sprite, narrow, gauss, composite] = await Promise.all([
+    const [sprite, narrow, cleanup, gauss, composite] = await Promise.all([
       loadWGSL(file('sprite'), { includes: { particle: particleStruct } }),
       loadWGSL(file('narrow_range')),
+      loadWGSL(file('cleanup')),
       loadWGSL(file('gauss')),
       loadWGSL(file('composite')),
     ]);
-    return new FluidRenderer(device, format, particles, { sprite, narrow, gauss, composite });
+    return new FluidRenderer(device, format, particles, {
+      sprite,
+      narrow,
+      cleanup,
+      gauss,
+      composite,
+    });
   }
 
   constructor(device, format, particles, src) {
@@ -59,6 +66,7 @@ export class FluidRenderer {
     };
     this.pNarrowX = fullscreen(src.narrow, 'r32float', { DX: 1, DY: 0 });
     this.pNarrowY = fullscreen(src.narrow, 'r32float', { DX: 0, DY: 1 });
+    this.pClean = fullscreen(src.cleanup, 'r32float');
     this.pGaX = fullscreen(src.gauss, 'r16float', { DX: 1, DY: 0 });
     this.pGaY = fullscreen(src.gauss, 'r16float', { DX: 0, DY: 1 });
     this.pComp = fullscreen(src.composite, format);
@@ -88,9 +96,11 @@ export class FluidRenderer {
     this.bgs = {
       narrowX: bind(d, this.pNarrowX, [this.uniforms, view('d0')]),
       narrowY: bind(d, this.pNarrowY, [this.uniforms, view('d1')]),
+      clean: bind(d, this.pClean, [this.uniforms, view('d0')]),
       gaX: bind(d, this.pGaX, [view('t0')]),
       gaY: bind(d, this.pGaY, [view('t1')]),
       comp: bind(d, this.pComp, [this.uniforms, view('d0'), view('t0')]),
+      compSmooth: bind(d, this.pComp, [this.uniforms, view('d1'), view('t0')]),
     };
   }
 
@@ -143,10 +153,11 @@ export class FluidRenderer {
         quad(tex.d1.createView(), FAR, this.pNarrowX, bgs.narrowX);
         quad(tex.d0.createView(), FAR, this.pNarrowY, bgs.narrowY);
       }
+      quad(tex.d1.createView(), FAR, this.pClean, bgs.clean);
       quad(tex.t1.createView(), ZERO, this.pGaX, bgs.gaX);
       quad(tex.t0.createView(), ZERO, this.pGaY, bgs.gaY);
     }
-    quad(targetView, ZERO, this.pComp, bgs.comp);
+    quad(targetView, ZERO, this.pComp, smooth ? bgs.compSmooth : bgs.comp);
   }
 
   destroy() {
