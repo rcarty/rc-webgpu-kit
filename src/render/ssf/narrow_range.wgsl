@@ -32,19 +32,26 @@ fn fs(@builtin(position) fc: vec4f) -> @location(0) f32 {
     if (a < lo || b < lo) {
       continue;
     }
-    // anything too far behind, the background included, counts as just behind
-    if (a > hi) {
-      a = d0 + r.radius;
-    } else {
+    // too far behind to be this surface, background included
+    let farA = a > hi;
+    if (!farA) {
       // the range follows the surface, so a slope seen edge-on still gets smoothed
       lo = min(lo, a - delta);
       hi = max(hi, a + delta);
     }
-    if (b > hi) {
-      b = d0 + r.radius;
-    } else {
+    let farB = b > hi;
+    if (!farB) {
       lo = min(lo, b - delta);
       hi = max(hi, b + delta);
+    }
+    if (farA != farB) {
+      // only one side too far, so the pair adds nothing. otherwise outline bumps bleed in
+      a = d0;
+      b = d0;
+    } else if (farA) {
+      // both too far, so they count as just behind. rounds off thin features
+      a = d0 + r.radius;
+      b = a;
     }
     sum += (a + b) * w;
     wsum += 2.0 * w;

@@ -34,17 +34,23 @@ fn fs(@builtin(position) fc: vec4f) -> @location(0) f32 {
         if (a < lo || b < lo) {
           continue;
         }
-        if (a > hi) {
-          a = d0 + r.radius;
-        } else {
+        // same as narrow_range.wgsl
+        let farA = a > hi;
+        if (!farA) {
           lo = min(lo, a - delta);
           hi = max(hi, a + delta);
         }
-        if (b > hi) {
-          b = d0 + r.radius;
-        } else {
+        let farB = b > hi;
+        if (!farB) {
           lo = min(lo, b - delta);
           hi = max(hi, b + delta);
+        }
+        if (farA != farB) {
+          a = d0;
+          b = d0;
+        } else if (farA) {
+          a = d0 + r.radius;
+          b = a;
         }
         sum += (a + b) * w;
         wsum += 2.0 * w;
