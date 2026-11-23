@@ -38,10 +38,8 @@ fn fs(@builtin(position) fc: vec4f) -> @location(0) vec4f {
   if (dyp > NO_FLUID || (dym < NO_FLUID && abs(ddy2.z) < abs(ddy.z))) {
     ddy = ddy2;
   }
-  var n = normalize(cross(ddy, ddx));
-  if (n.z < 0.0) {
-    n = -n;
-  }
+  // already faces the eye, no flip needed. n.z can go negative off centre
+  let n = normalize(cross(ddy, ddx));
   let t = textureLoad(thickTex, c, 0).r;
   // debug views: 1 depth, 2 normals, 3 thickness
   let show = u32(r.debug.x);
