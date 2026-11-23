@@ -1,6 +1,6 @@
 {
   "name": "rc-webgpu-kit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shared WebGPU code for my demos: GPU sorts, MLS-MPM pieces, screen-space fluid rendering and device helpers.",
   "type": "module",
   "main": "src/index.js",
