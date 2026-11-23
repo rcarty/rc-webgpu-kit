@@ -18,7 +18,8 @@ fn fs(@builtin(position) fc: vec4f) -> @location(0) f32 {
   let px = r.radius * r.proj[1][1] * r.size.y * 0.5 / d0;
   let sig = clamp(px * 1.25, 0.5, 12.0);
   let rad = i32(ceil(2.0 * sig));
-  let delta = r.radius * 2.0;
+  // depth gap that still counts as one surface. the paper's value, 2 was too tight edge-on
+  let delta = r.radius * 10.5;
   var lo = d0 - delta;
   var hi = d0 + delta;
   var sum = d0;
